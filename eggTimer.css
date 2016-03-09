@@ -1,0 +1,19 @@
+.jumbotron 
+{
+	background-color: #ff6600;
+}
+
+.jumbotron h1
+{
+  color: #333333;
+  font-family: Monaco, monospace;
+}
+
+.egg
+{
+	-webkit-transition: background-color 0.5s, color 0.5s ease;
+    -moz-transition: background-color 0.5s, color 0.5s ease;
+    -o-transition: background-color 0.5s, color 0.5s ease;
+    -khtml-transition: background-color 0.5s,  color 0.5s;
+    transition: background-color 0.5s, color 0.5s;
+}
