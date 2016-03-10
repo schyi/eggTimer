@@ -73,13 +73,20 @@ $(document).ready(function(){
 			case 3: 
 			case 4:
 				eggWhite.css(whiteStage.gel);
+				eggYolk.css(yolkStage.raw);
 				break;
 			case 5:
-			case 6: 
 				eggWhite.css(whiteStage.milky);
-				eggYolk.css(yolkStage.runny);
+				eggYolk.css(yolkStage.raw);
+				break;
+			case 6: 
+				eggWhite.css(whiteStage.solid);
+				eggYolk.css(yolkStage.raw);
 				break;
 			case 7:
+				eggWhite.css(whiteStage.solid);
+				eggYolk.css(yolkStage.runny);
+				break;
 			case 8:
 			case 9:
 			case 10:
