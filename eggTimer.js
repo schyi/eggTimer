@@ -1,11 +1,8 @@
 $(document).ready(function(){
-
-
 	var timer = {
 		minutes : 0,
 		seconds :  0, 
 		isOn : false,
-		countDown : false,
 		hitMax: function () { 
 			return this.minutes > 15;
 		},
@@ -35,25 +32,17 @@ $(document).ready(function(){
 			startCount();
 		}
 	);
-	$("#reset").click(resetCount);
+	$("#reset").click(onReset);
 
-	var eggSlider = $('#eggslider').slider({
+	$('#eggslider').slider({
 		formatter: function(value) {
 			return 'Minute: ' + value;
 			}
-		});
-	eggSlider.on('change', function(slideEvt) {
+		}).on('change', function(slideEvt) {
 			resetCount();
 			timer.minutes = slideEvt.value.newValue;
-			// set to countDown mode if not zero
-			if (slideEvt.value.newValue != 0) {
-				timer.countDown = true;
-			}
-			else {
-				timer.countDown = false;
-			}
 			printTimer();
-			adjustEggStage(timer.minutes);
+			adjustEggStage();
 			});
 
 
@@ -73,8 +62,8 @@ $(document).ready(function(){
 		timer.blink = !timer.blink;
 	}
 
-	function adjustEggStage(minute) {
-		switch(minute) {
+	function adjustEggStage() {
+		switch(timer.minutes) {
 			case 0: 
 			case 1:
 			case 2:
@@ -109,7 +98,7 @@ $(document).ready(function(){
 				eggWhite.css(whiteStage.solid);
 				eggYolk.css(yolkStage.solid);
 		}
-		if (minute >= 15) {
+		if (timer.minutes >= 15) {
 				eggYolk.css(yolkStage.overcooked);
 		}
 		else {
@@ -120,33 +109,33 @@ $(document).ready(function(){
 	function startCount() {
 		if (!timer.isOn) {
 			timer.isOn = true;
-			if (timer.countDown) {
-				t = setInterval(function () {
-					if (timer.seconds == 0) {
-						timer.minutes --;
-						timer.seconds = 60;
-					}
-					timer.seconds --; 
-					printTimer();
-					}, 1000);
-			}
-			else {
-				t = setInterval(function () {
-					timer.seconds ++; 
-					if (timer.seconds % 60 === 0 ) {
-						timer.minutes ++; 
-						timer.seconds = 0;
-						adjustEggStage(timer.minutes);
-					}
-					printTimer();
-					}, 1000);
-			}
+			t = setInterval(function () 
+			{
+				timer.seconds ++; 
+				if (timer.seconds % 60 === 0 ) 
+				{						timer.minutes ++; 
+					timer.seconds = 0;
+					adjustEggStage();
+				}
+			printTimer();}, 1000);
 			
 			startStopButton.text("Pause");
 			startStopButton.click(stopCount);
 			startStopButton.removeClass("btn-success");
 			startStopButton.addClass("btn-danger");
 		}
+	}
+
+	function countDown() {
+		t = setInterval(
+			function () {
+				if (timer.seconds == 0) {
+					timer.minutes --;
+					timer.seconds = 60;
+				}
+				timer.seconds --; 
+				printTimer();
+				}, 1000);
 	}
 
 	function stopCount() {
@@ -158,11 +147,21 @@ $(document).ready(function(){
 		startStopButton.addClass("btn-success");
 	}
 
+	function onReset() {
+		$('#eggslider').slider('setValue', 0, {
+		formatter: function(value) {
+			return 'Minute: ' + value;
+			}
+		});
+		resetCount();
+		console.log("after resetCount, timer.minutes = " + timer.minutes);
+		adjustEggStage();
+	}
+
 	function resetCount() {
 		if (timer.isOn) {
 			stopCount();
 		}
-
 		timer.seconds = 0; 
 		timer.minutes = 0; 
 		printTimer();
