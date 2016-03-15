@@ -6,25 +6,90 @@ $(document).ready(function(){
 		hitMax: function () { 
 			return this.minutes > 15;
 		},
-		blink: false
-	};
-	var whiteStage = {
-		raw: { "background-color": "#333333", color: "#FFFFFF" },
-		gel: { "background-color": "#999999", color: "#333333" },
-		milky: { "background-color": "#cccccc", color: "#333333" },
-		solid: { "background-color": "#FFFFFF", color: "#333333" }
-	};
-	var yolkStage = {
-		raw: { "background-color": "#ff6600", color: "#333333" },
-		runny: { "background-color": "#ff8000", color: "#333333" },
-		gel: { "background-color": "#ffbf00", color: "#333333" },
-		solid: { "background-color": "#ffe066", color: "#333333" },
-		notOvercooked: {"border" : "none"},
-		overcooked: { "border" : "solid 4pt #7C8864"}
+		blink: false,
+		print: function () {
+			var min = this.minutes < 10 ? "0" : "";
+			var sec = + this.seconds < 10 ? "0" : "";
+			if (this.hitMax() && this.blink) {
+					$("#timer-text").text("OVERCOOKED");
+			}
+			else {
+				$("#timer-text").text(min
+					+ this.minutes
+					+ ":"
+					+ sec
+					+ this.seconds);
+			}
+			this.blink = !this.blink;
+		}
 	};
 
 	var eggWhite = $("#egg-white");
 	var eggYolk = $("#yolk-center");
+	var eggDonenessText = $("#egg-doneness");
+
+	var whiteStage = {
+		raw: { "background-color": "#333333", color: "#FFFFFF" },
+		runny: { "background-color": "#999999", color: "#333333" },
+		gel: { "background-color": "#cccccc", color: "#333333" },
+		solid: { "background-color": "#FFFFFF", color: "#333333" },
+		print : function (minute) {
+			var currentState = {};
+			if (minute < 3) {
+				currentState = this.raw;
+			}
+			else if (minute < 5) {
+				currentState = this.runny;
+			}
+			else if (minute < 6) {
+				currentState = this.gel;
+			}
+			else {
+				currentState = this.solid;
+			}
+			eggWhite.css(currentState);
+		}
+	};
+	var yolkStage = {
+		raw: { "background-color": "#ff4500", color: "#333333" },
+		runny: { "background-color": "#ff8000", color: "#333333" },
+		gel: { "background-color": "#ffbf00", color: "#333333" },
+		solid: { "background-color": "#ffe066", color: "#333333" },
+		notOvercooked: {"border" : "none"},
+		overcooked: { "border" : "solid 4pt #7C8864"},
+		print : function (minute) {
+			var currentState = {};
+			if (minute < 5) {
+				currentState = this.raw;
+				eggDonenessText.text("RAW");
+			}
+			else if (minute < 7) {
+				currentState = this.runny; 
+				eggDonenessText.text("RUNNY");
+			}
+			else if (minute < 9) {
+				currentState = this.gel;
+				eggDonenessText.text("GOOEY");
+			}
+			else if (minute < 11){
+				currentState = this.solid;
+				eggDonenessText.text("JUST COOKED THROUGH");
+			}
+			else {
+				eggDonenessText.text("HARD");
+			}
+			eggYolk.css(currentState);
+
+			if (minute > 14) {
+				eggYolk.css(this.overcooked);
+				eggDonenessText.text("CHALKY");
+			}
+			else {
+				eggYolk.css(this.notOvercooked);
+			}
+		}
+	};
+
 	var t; // timespan val from javascript
 	var startStopButton = $("#start-stop");
 	startStopButton.click(
@@ -41,91 +106,19 @@ $(document).ready(function(){
 		}).on('change', function(slideEvt) {
 			resetCount();
 			timer.minutes = slideEvt.value.newValue;
-			printTimer();
+			timer.print();
 			adjustEggStage();
 			});
 
-
-	function printTimer() {
-		var min = timer.minutes < 10 ? "0" : "";
-		var sec = + timer.seconds < 10 ? "0" : "";
-		if (timer.hitMax() && timer.blink) {
-				$("#timer-text").text("OVERCOOKED");
-		}
-		else {
-			$("#timer-text").text(min
-				+ timer.minutes
-				+ ":"
-				+ sec
-				+ timer.seconds);
-		}
-		timer.blink = !timer.blink;
-	}
-
 	function adjustEggStage() {
-		switch(timer.minutes) {
-			case 0: 
-			case 1:
-			case 2:
-				eggWhite.css(whiteStage.raw);
-				eggYolk.css(yolkStage.raw);
-				break;
-			case 3: 
-			case 4:
-				eggWhite.css(whiteStage.gel);
-				eggYolk.css(yolkStage.raw);
-				break;
-			case 5:
-				eggWhite.css(whiteStage.milky);
-				eggYolk.css(yolkStage.raw);
-				break;
-			case 6: 
-				eggWhite.css(whiteStage.solid);
-				eggYolk.css(yolkStage.raw);
-				break;
-			case 7:
-				eggWhite.css(whiteStage.solid);
-				eggYolk.css(yolkStage.runny);
-				break;
-			case 8:
-			case 9:
-			case 10:
-				eggWhite.css(whiteStage.solid);
-				eggYolk.css(yolkStage.gel);
-				break;
-			case 11: 
-			case 12: 
-			case 13: 
-				eggWhite.css(whiteStage.solid);
-				eggYolk.css(yolkStage.solid);
-				break;
-			case 14: 
-			case 15: 
-			default:
-				eggWhite.css(whiteStage.solid);
-				eggYolk.css(yolkStage.solid);
-		}
-		if (timer.minutes >= 15) {
-				eggYolk.css(yolkStage.overcooked);
-		}
-		else {
-			eggYolk.css(yolkStage.notOvercooked);
-		}
+		whiteStage.print(timer.minutes);
+		yolkStage.print(timer.minutes);
 	}
 
 	function startCount() {
 		if (!timer.isOn) {
 			timer.isOn = true;
-			t = setInterval(function () 
-			{
-				timer.seconds ++; 
-				if (timer.seconds % 60 === 0 ) 
-				{						timer.minutes ++; 
-					timer.seconds = 0;
-					adjustEggStage();
-				}
-			printTimer();}, 1000);
-			
+			countDown();
 			startStopButton.text("Pause");
 			startStopButton.click(stopCount);
 			startStopButton.removeClass("btn-success");
@@ -133,16 +126,30 @@ $(document).ready(function(){
 		}
 	}
 
-	function countDown() {
-		t = setInterval(
-			function () {
-				if (timer.seconds == 0) {
-					timer.minutes --;
-					timer.seconds = 60;
+	function countUp() {
+		t = setInterval(function () 
+			{
+				timer.seconds ++; 
+				if (timer.seconds % 60 === 0 ) 
+				{						timer.minutes ++; 
+					timer.seconds = 0;
+					adjustEggStage();
 				}
-				timer.seconds --; 
-				printTimer();
-				}, 1000);
+			timer.print();}, 1000);
+	}
+
+	function countDown() {
+		if (timer.minutes > 0) {
+			t = setInterval(
+				function () {
+					if (timer.seconds == 0) {
+						timer.minutes --;
+						timer.seconds = 60;
+					}
+					timer.seconds --; 
+					timer.print();
+					}, 1000);
+		}
 	}
 
 	function stopCount() {
@@ -154,6 +161,10 @@ $(document).ready(function(){
 		startStopButton.addClass("btn-success");
 	}
 
+	var sliderFormatter = function (silderValue) {
+		// return something like... Yolk = raw, gooey, 
+	}
+
 	function onReset() {
 		$('#eggslider').slider('setValue', 0, {
 		formatter: function(value) {
@@ -163,6 +174,7 @@ $(document).ready(function(){
 		resetCount();
 		console.log("after resetCount, timer.minutes = " + timer.minutes);
 		adjustEggStage();
+		eggDonenessText.text("<Slide below to Adjust Doneness>");
 	}
 
 	function resetCount() {
@@ -171,6 +183,6 @@ $(document).ready(function(){
 		}
 		timer.seconds = 0; 
 		timer.minutes = 0; 
-		printTimer();
+		timer.print();
 	}
 });
